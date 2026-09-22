@@ -1,61 +1,68 @@
 using System.Linq.Expressions;
+using Unity.VisualScripting;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyMovement : MonoBehaviour
 {
-    // Reference to the NavMeshAgent component for pathfinding.
+    // This is how far the enemy picks its next target from its current position
+    private float wanderRadius = 15f;
+
+    // The playable area
+    private Vector2 mapBounds = new Vector2(29.3f, 29.6f);
+
+    // How close to its current target the enemy needs to be to pick a new one
+    private float arriveDistance = 1.0f;
+
+    private int maxSampleAttempts = 30;
+
     private NavMeshAgent navMeshAgent;
 
-    float randX;
-    float randZ;
-
-    int randomPos;
-
-    Vector3 PosX;
-    Vector3 PosZ;
-
-    // Start is called before the first frame update.
     void Start()
     {
-        // Get and store the NavMeshAgent component attached to this object.
         navMeshAgent = GetComponent<NavMeshAgent>();
 
-
+        PickNewDestination();
     }
 
-    // Update is called once per frame.
     void Update()
     {
-        if (navMeshAgent.destination == PosX || navMeshAgent.destination == PosZ)
+        if (navMeshAgent.pathPending)
         {
-            RandomGen();
+            return;
         }
 
-        if (randomPos == 0)
+        // Checks that the enemy has actually come to a stop since remainingDistance reads as 0 for a moment after setDestination
+        bool arrived = navMeshAgent.remainingDistance <= Mathf.Max(arriveDistance, navMeshAgent.stoppingDistance)
+                                                         && (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude < 0.01f);
+
+        if (arrived)
         {
-            if (PosX != null)
-            {
-                navMeshAgent.SetDestination(PosX);
-            }
-        }
-        else
-        {
-            if (PosZ != null)
-            {
-                navMeshAgent.SetDestination(PosZ);
-            }
+            PickNewDestination();
         }
     }
 
-    void RandomGen()
+    void PickNewDestination()
     {
-        randX = Random.Range(-29.3f, 29.3f);
-        randZ = Random.Range(29.6f, 29.6f);
+        for (int index = 0; index < maxSampleAttempts; index++)
+        {
+            // A random point in a radius around the enemy -- originally was forcing movement along single axis
+            Vector2 offset = Random.insideUnitCircle * wanderRadius;
+            Vector3 candidate = transform.position + new Vector3(offset.x, 0.0f, offset.y);
 
-        randomPos = Random.Range(0, 1);
+            candidate.x = Mathf.Clamp(candidate.x, -mapBounds.x, mapBounds.x);
+            candidate.z = Mathf.Clamp(candidate.z, -mapBounds.y, mapBounds.y);
 
-        PosX = new Vector3(randX, 0, 0);
-        PosZ = new Vector3(0, 0, randZ);
+            // Snaps the candidate position onto the navmesh sot the enemy can actually reach it
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+            {
+                navMeshAgent.SetDestination(hit.position);
+
+                return;
+            }
+
+
+        }
     }
 }
