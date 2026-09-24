@@ -57,6 +57,9 @@ public class PlayerController : MonoBehaviour
             if (enemySize < playerSize)
             {
                 other.gameObject.SetActive(false);
+
+                rb.mass += 0.1f;
+                rb.transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
             }
         }
     }

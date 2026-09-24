@@ -3,6 +3,8 @@ using UnityEngine.AI;
 
 public class EnemyController : MonoBehaviour
 {
+    private Rigidbody rb;
+
     // This is how far the enemy picks its next target from its current position
     private float wanderRadius = 15f;
 
@@ -80,6 +82,9 @@ public class EnemyController : MonoBehaviour
         if (GetSize(other.transform) < GetSize(transform))
         {
             other.gameObject.SetActive(false);
+
+            rb.mass += 0.1f;
+            transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
         }
     }
 
