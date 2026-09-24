@@ -1,10 +1,7 @@
-using System.Linq.Expressions;
-using Unity.VisualScripting;
-using UnityEditor.ShaderGraph.Internal;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyMovement : MonoBehaviour
+public class EnemyController : MonoBehaviour
 {
     // This is how far the enemy picks its next target from its current position
     private float wanderRadius = 15f;
@@ -68,8 +65,28 @@ public class EnemyMovement : MonoBehaviour
 
                 return;
             }
-
-
         }
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        // Enemy vs enemy: both enemies receive this event, so each one only removes the other if it is smaller.
+        // Enemy vs player: the enemy removes a smaller player here; PlayerController removes a smaller enemy.
+        if (!other.CompareTag("Enemy") && !other.CompareTag("Player"))
+        {
+            return;
+        }
+
+        if (GetSize(other.transform) < GetSize(transform))
+        {
+            other.gameObject.SetActive(false);
+        }
+    }
+
+    private static float GetSize(Transform target)
+    {
+        Vector3 scale = target.lossyScale;
+
+        return scale.x * scale.y * scale.z;
     }
 }
