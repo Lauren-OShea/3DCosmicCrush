@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class PlayerController : MonoBehaviour
     // Movement along X and Y axes.
     private float movementX;
     private float movementY;
+
+    private float minScale = 0.5f;
+    private float maxScale = 3.0f;
 
     // Speed at which the player moves.
     public float speed = 0;
@@ -44,6 +48,29 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(movement * speed);
     }
 
+    // Added Update() because FixedUpdate() was unreliably detecting key changes.
+    void Update()
+    {
+        Keyboard keyboard = Keyboard.current;
+
+        if (keyboard != null && (keyboard.wKey.wasPressedThisFrame || keyboard.aKey.wasPressedThisFrame
+                                 || keyboard.sKey.wasPressedThisFrame || keyboard.dKey.wasPressedThisFrame))
+        {
+            ChangeSize(-0.05f);
+        }
+    }
+
+    // Grows or shrinks the player, keeping its scale between minScale and maxScale.
+    // Mass changes by the same amount the scale actually changed, so it also stops once the scale hits a limit.
+    void ChangeSize(float amount)
+    {
+        float currentScale = transform.localScale.x;
+        float newScale = Mathf.Clamp(currentScale + amount, minScale, maxScale);
+
+        transform.localScale = new Vector3(newScale, newScale, newScale);
+        rb.mass += newScale - currentScale;
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Enemy"))
@@ -58,8 +85,7 @@ public class PlayerController : MonoBehaviour
             {
                 other.gameObject.SetActive(false);
 
-                rb.mass += 0.1f;
-                rb.transform.localScale += new Vector3(0.1f, 0.1f, 0.1f);
+                ChangeSize(0.1f);
             }
         }
     }

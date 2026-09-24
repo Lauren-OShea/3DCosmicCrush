@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.InputSystem;
 
 public class EnemyController : MonoBehaviour
 {
@@ -18,12 +19,13 @@ public class EnemyController : MonoBehaviour
 
     private NavMeshAgent navMeshAgent;
 
-    private float minScale = 0.2f;
-    private float maxScale = 2.0f;
+    private float minScale = 0.5f;
+    private float maxScale = 3.0f;
 
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+        rb = GetComponent<Rigidbody>();
 
         // Pick a random uniform scale once, when the enemy spawns
         float size = Random.Range(minScale, maxScale);
