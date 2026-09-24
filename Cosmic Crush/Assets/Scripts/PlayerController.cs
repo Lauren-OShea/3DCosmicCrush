@@ -43,4 +43,21 @@ public class PlayerController : MonoBehaviour
         // Apply force to the Rigidbody to move the player.
         rb.AddForce(movement * speed);
     }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
+        {
+            Vector3 enemyScale = other.transform.lossyScale;
+            Vector3 playerScale = transform.lossyScale;
+
+            float enemySize = enemyScale.x * enemyScale.y * enemyScale.z;
+            float playerSize = playerScale.x * playerScale.y * playerScale.z;
+
+            if (enemySize < playerSize)
+            {
+                other.gameObject.SetActive(false);
+            }
+        }
+    }
 }

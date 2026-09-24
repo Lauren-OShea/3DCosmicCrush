@@ -19,9 +19,16 @@ public class EnemyMovement : MonoBehaviour
 
     private NavMeshAgent navMeshAgent;
 
+    private float minScale = 0.2f;
+    private float maxScale = 2.0f;
+
     void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
+
+        // Pick a random uniform scale once, when the enemy spawns
+        float size = Random.Range(minScale, maxScale);
+        transform.localScale = new Vector3(size, size, size);
 
         PickNewDestination();
     }
