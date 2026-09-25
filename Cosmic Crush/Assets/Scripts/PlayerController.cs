@@ -4,11 +4,14 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
+using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
     // Rigidbody of the player.
     private Rigidbody rb;
+
+    private int count;
 
     // Movement along X and Y axes.
     private float movementX;
@@ -20,11 +23,15 @@ public class PlayerController : MonoBehaviour
     // Speed at which the player moves.
     public float speed = 0;
 
+    public TextMeshProUGUI countText;
+
     // Start is called before the first frame update.
     void Start()
     {
         // Get and store the Rigidbody component attached to the player.
         rb = GetComponent<Rigidbody>();
+        SetCountText();
+        count = 0;
     }
 
     // This function is called when a move input is detected.
@@ -85,8 +92,19 @@ public class PlayerController : MonoBehaviour
             {
                 other.gameObject.SetActive(false);
 
+                count += (int)other.gameObject.GetComponent<Transform>().localScale.x;
+
+                SetCountText();
+
                 ChangeSize(0.1f);
             }
         }
+    }
+
+    void SetCountText()
+    {
+        countText.text = "Score: " + count.ToString();
+
+
     }
 }
