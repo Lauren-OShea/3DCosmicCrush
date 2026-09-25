@@ -44,6 +44,7 @@ public class EnemyController : MonoBehaviour
         // Checks that the enemy has actually come to a stop since remainingDistance reads as 0 for a moment after setDestination
         bool arrived = navMeshAgent.remainingDistance <= Mathf.Max(arriveDistance, navMeshAgent.stoppingDistance)
                                                          && (!navMeshAgent.hasPath || navMeshAgent.velocity.sqrMagnitude < 0.01f);
+        changeColour();
 
         if (arrived)
         {
@@ -69,6 +70,22 @@ public class EnemyController : MonoBehaviour
 
                 return;
             }
+        }
+    }
+
+    void changeColour()
+    {
+        if (transform.localScale.x >= minScale && transform.localScale.x < 1.0f)
+        {
+            gameObject.GetComponent<Renderer>().material.color = Color.red;
+        }
+        else if (transform.localScale.x > 1.0f && transform.localScale.x < 2.0f)
+        {
+            gameObject.GetComponent<Renderer>().material.color = Color.yellow;
+        }
+        else if (transform.localScale.x > 2.0f && transform.localScale.x < maxScale)
+        {
+            gameObject.GetComponent<Renderer>().material.color = Color.green;
         }
     }
 
