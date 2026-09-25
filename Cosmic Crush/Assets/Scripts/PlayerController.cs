@@ -5,33 +5,42 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using TMPro;
+using System;
 
 public class PlayerController : MonoBehaviour
 {
     // Rigidbody of the player.
     private Rigidbody rb;
 
-    private int count;
+    private float count;
 
     // Movement along X and Y axes.
     private float movementX;
     private float movementY;
 
     private float minScale = 0.5f;
-    private float maxScale = 3.0f;
+    private float maxScale = 15.0f;
 
     // Speed at which the player moves.
     public float speed = 0;
 
     public TextMeshProUGUI countText;
 
+    public GameObject winTextObject;
+
+    public GameObject loseTextObject;
+
     // Start is called before the first frame update.
     void Start()
     {
         // Get and store the Rigidbody component attached to the player.
         rb = GetComponent<Rigidbody>();
+
+        winTextObject.SetActive(false);
+        loseTextObject.SetActive(false);
+
         SetCountText();
-        count = 0;
+        count = 0.0f;
     }
 
     // This function is called when a move input is detected.
@@ -92,19 +101,48 @@ public class PlayerController : MonoBehaviour
             {
                 other.gameObject.SetActive(false);
 
-                count += (int)other.gameObject.GetComponent<Transform>().localScale.x;
+                GameObject[] getCount = GameObject.FindGameObjectsWithTag("Enemy");
+
+                int numEnemy = getCount.Length;
+
+                if(numEnemy <= 0)
+                {
+                    setWinText();
+                }
+
+                Debug.Log(numEnemy);
+ 
+                float value = other.gameObject.GetComponent<Transform>().localScale.x;
+
+                count += MathF.Truncate(value * 10) / 10;
 
                 SetCountText();
 
                 ChangeSize(0.1f);
             }
+            else if (enemySize > playerSize)
+            {
+                setLoseText();
+            }
         }
     }
+
+    
 
     void SetCountText()
     {
         countText.text = "Score: " + count.ToString();
 
 
+    }
+
+    void setWinText()
+    {
+        winTextObject.SetActive(true);
+    }
+
+    void setLoseText()
+    {
+        loseTextObject.SetActive(true);
     }
 }
